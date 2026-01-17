@@ -31,7 +31,7 @@ install_phpv() {
         print_info "Found a local copy of phpv."
     else
         print_info "Downloading phpv script from GitHub..."
-        if ! curl -fsSL -o phpv https://raw.githubusercontent.com/rajabilal555/phpv/main/phpv; then
+        if ! curl -fsSL -o phpv https://raw.githubusercontent.com/rajabilal555/phpv/refs/heads/main/phpv; then
             print_error "Failed to download phpv script from GitHub."
             exit 1
         fi
