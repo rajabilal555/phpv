@@ -7,21 +7,21 @@ YELLOW='\033[0;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-# Function to print colored messages with a touch of humor
+# Function to print colored messages
 print_error() {
-  echo -e "${RED}Oops... $1${NC}"
+  echo -e "${RED}Error: $1${NC}"
 }
 
 print_warning() {
-  echo -e "${YELLOW}Hold on... $1${NC}"
+  echo -e "${YELLOW}Warning: $1${NC}"
 }
 
 print_success() {
-  echo -e "${GREEN}Ta-da! $1${NC}"
+  echo -e "${GREEN}Success: $1${NC}"
 }
 
 print_info() {
-  echo -e "${BLUE}FYI: $1${NC}"
+  echo -e "${BLUE}Info: $1${NC}"
 }
 
 # Function to clone or update PHP version from AUR
@@ -33,41 +33,41 @@ clone_or_update_php() {
   # Create source directory if it doesn't exist
   if [ ! -d "$HOME/src" ]; then
     mkdir -p "$HOME/src" || {
-      print_error "Failed to create directory $HOME/src. Did the gnomes run off?"
+      print_error "Failed to create directory $HOME/src."
       exit 1
     }
   fi
 
   # Navigate to the source directory
   cd "$HOME/src" || {
-    print_error "Could not find the path to $HOME/src. Are we lost in the enchanted forest?"
+    print_error "Could not navigate to $HOME/src."
     exit 1
   }
 
   # Check if directory exists and is not empty
   if [ -d "$install_dir" ] && [ -n "$(ls -A $install_dir)" ]; then
-    print_info "Stirring up some magic to update PHP version $version..."
+    print_info "Updating PHP version $version..."
     cd "$install_dir" || {
-      print_error "Lost the path to $install_dir. Maybe a map spell will help?"
+      print_error "Could not navigate to $install_dir."
       exit 1
     }
     # Attempt to pull changes from 'master' branch first
     if ! git pull origin master; then
       # If 'master' branch fails, try 'main' branch
-      print_info "Trying 'main' branch... Abracadabra!"
+      print_info "Attempting to pull from 'main' branch..."
       if ! git pull origin main; then
-        print_error "Failed to pull latest changes from $aur_repo. Perhaps a stronger potion is needed?"
+        print_error "Failed to pull latest changes from $aur_repo."
         exit 1
       fi
     fi
   else
-    print_info "Conjuring PHP version $version from $aur_repo... *poof!*"
+    print_info "Cloning PHP version $version from $aur_repo..."
     git clone "$aur_repo" "$install_dir" || {
-      print_error "Oops, the magic circle was broken! Failed to clone PHP version ${version} from AUR."
+      print_error "Failed to clone PHP version ${version} from AUR."
       exit 1
     }
     cd "$install_dir" || {
-      print_error "Teleportation spell malfunction! Can't find $install_dir."
+      print_error "Could not navigate to $install_dir."
       exit 1
     }
   fi
@@ -76,10 +76,10 @@ clone_or_update_php() {
 # Function to build and install PHP version using makepkg
 build_and_install_php() {
   local version="$1"
-  print_info "Mixing potions to build and install PHP version $version..."
-  print_info "This may take a while... Gather 'round, wizards!"
+  print_info "Building and installing PHP version $version..."
+  print_info "This may take a while. Please be patient."
   makepkg -si --noconfirm || {
-    print_error "Failed the incantation to build or install PHP version $version. Did someone mispronounce 'makepkg'?"
+    print_error "Failed to build or install PHP version $version."
     exit 1
   }
 }
@@ -103,18 +103,18 @@ create_symlinks() {
     bin_path=$(command -v "${bin}${version}")
     if [ -n "$bin_path" ]; then
       ln -s "$bin_path" "${HOME}/bin/${bin}" || {
-        print_warning "Failed to weave a symbolic link for $bin. Are the threads tangled?"
+        print_warning "Failed to create symbolic link for $bin."
       }
     else
-      print_warning "The rune stone for ${bin}${version} is missing. Check the ancient archives."
+      print_warning "Binary ${bin}${version} not found."
     fi
   done
 
   # Verify symbolic links creation
   if [ $? -eq 0 ]; then
-    print_success "Hocus pocus! Switched to PHP version ${version}."
+    print_success "Switched to PHP version ${version}."
   else
-    print_error "The mystical threads snapped! Failed to create symbolic links for PHP version ${version}."
+    print_error "Failed to create symbolic links for PHP version ${version}."
     exit 1
   fi
 }
@@ -125,7 +125,7 @@ switch_php_version() {
 
   # Check if PHP binary exists for the specified version
   if ! command -v "php${version}" &>/dev/null; then
-    print_error "The crystal ball reveals that PHP version ${version} is not installed."
+    print_error "PHP version ${version} is not installed."
     exit 1
   fi
 
@@ -133,7 +133,7 @@ switch_php_version() {
   create_symlinks "$version"
 
   # Verify PHP version after switching
-  print_info "Conjuring spirits to verify PHP version..."
+  print_info "Verifying PHP version..."
   php -v
 }
 
@@ -141,7 +141,7 @@ switch_php_version() {
 
 # Check if PHP version argument is provided
 if [ $# -ne 1 ] && [ $# -ne 2 ]; then
-  print_info "Magic instructions: $0 -i <version> to install/update | $0 <version> to switch."
+  print_info "Usage: $0 -i <version> to install/update | $0 <version> to switch."
   exit 1
 fi
 
@@ -152,7 +152,7 @@ elif [ $# -eq 1 ]; then
   action="switch"
   version="$1"
 else
-  print_error "The spell has been mispronounced! Invalid command incantation."
+  print_error "Invalid command syntax."
   exit 1
 fi
 
@@ -166,7 +166,7 @@ switch)
   switch_php_version "$version"
   ;;
 *)
-  print_error "The cauldron is bubbling with unknown commands: $action"
+  print_error "Unknown action: $action"
   exit 1
   ;;
 esac
